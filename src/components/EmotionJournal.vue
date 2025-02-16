@@ -9,16 +9,11 @@
       <el-form-item label="日期">
         <el-date-picker v-model="form.date" type="date" placeholder="选择日期" />
       </el-form-item>
-      <el-form-item label="当前情绪">
-        <el-select v-model="form.emotion" placeholder="请选择情绪">
-          <el-option label="开心" value="happy" />
-          <el-option label="平静" value="calm" />
-          <el-option label="焦虑" value="anxious" />
-          <el-option label="悲伤" value="sad" />
-        </el-select>
+      <el-form-item label="日记标题">
+        <el-input v-model="form.emotion" placeholder="今天心情如何?" style="width: 100%;" />
       </el-form-item>
       <el-form-item label="日记内容">
-        <el-input v-model="form.content" type="textarea" rows="4" />
+        <el-input v-model="form.content" type="textarea" rows="6" style="width: 100%;" />
       </el-form-item>
       <el-button type="primary" native-type="submit" icon="el-icon-check">保存记录</el-button>
     </el-form>

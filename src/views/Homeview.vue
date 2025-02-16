@@ -1,10 +1,7 @@
 <template>
   <div class="home-container">
     <!-- 首页其他内容 -->
-    <div class="home-content">
-      <h2>欢迎来到心灵花园</h2>
-      <p>您的心理健康成长平台</p>
-    </div>
+
     
     <!-- 轮播图部分 -->
     <div class="carousel-container" 
@@ -30,7 +27,10 @@
               @click="goToSlide(n-1)"></span>
       </div>
     </div>
-
+    <div class="home-content">
+      <h2>欢迎来到心灵花园</h2>
+      <p>您的心理健康成长平台</p>
+    </div>
     <!-- 新增导航卡片 -->
     <div class="nav-card-container">
       <el-row :gutter="20">
@@ -132,21 +132,23 @@ onBeforeUnmount(pauseAutoPlay);
 .home-container {
   padding-top: 100px;
   padding-bottom: 60px;
+  background-color: #ffffff;
 }
 
 /* 轮播图样式 */
 .carousel-container {
   position: relative;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  margin-top: -95px;
   overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 1px;
+  box-shadow: 0 px 16px rgba(0,0,0,0.1);
+  background-color: white;
 }
 
 .carousel-track {
   display: flex;
-  transition: transform 0.5s ease;
+  transition: transform 0.5s ease-in-out;
 }
 
 .carousel-slide {
@@ -158,6 +160,7 @@ onBeforeUnmount(pauseAutoPlay);
   width: 100%;
   height: 400px;
   object-fit: cover;
+  border-radius: 16px 16px 0 0;
 }
 
 /* 控制按钮 */
@@ -165,21 +168,22 @@ onBeforeUnmount(pauseAutoPlay);
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.4);
   color: white;
   border: none;
   padding: 1rem;
   cursor: pointer;
   font-size: 1.5rem;
   transition: background 0.3s;
+  border-radius: 50%;
 }
 
 .carousel-btn:hover {
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.7);
 }
 
-.prev { left: 0; }
-.next { right: 0; }
+.prev { left: 1rem; }
+.next { right: 1rem; }
 
 /* 分页指示器 */
 .pagination {
@@ -213,10 +217,16 @@ onBeforeUnmount(pauseAutoPlay);
 }
 
 .home-content h2 {
-  color: #2c3e50;
+  color: #34495e;
   font-size: 4rem;
   margin-bottom: 1rem;
   font-family: "KaiTi", "STKaiti", serif;
+}
+
+.home-content p {
+  color: #7f8c8d;
+  font-size: 1.2rem;
+  line-height: 1.6;
 }
 
 /* 导航卡片样式 */
@@ -230,11 +240,13 @@ onBeforeUnmount(pauseAutoPlay);
   margin-bottom: 20px;
   cursor: pointer;
   transition: all 0.3s;
+  border-radius: 12px;
+  background-color: white;
 }
 
 .nav-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
 .card-content {
@@ -253,7 +265,7 @@ onBeforeUnmount(pauseAutoPlay);
 .card-title {
   font-size: 1.1rem;
   font-weight: 500;
-  color: #2c3e50;
+  color: #34495e;
   text-align: center;
 }
 
@@ -261,6 +273,7 @@ onBeforeUnmount(pauseAutoPlay);
 @media (max-width: 768px) {
   .carousel-image {
     height: 300px;
+    border-radius: 12px 12px 0 0;
   }
   
   .home-content h2 {
