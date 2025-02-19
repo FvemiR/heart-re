@@ -108,7 +108,7 @@ async function sendMessage() {
 }
 
 .messages-container {
-  min-height: 700px;
+  min-height: 500px;
   height: calc(100% - 120px); /* 动态计算高度 */
   overflow-y: auto;
   padding: 20px;
