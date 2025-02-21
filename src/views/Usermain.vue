@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import AI from '../components/AI.vue';
 import { ElMenu, ElMenuItem, ElAvatar } from 'element-plus';
@@ -68,33 +68,45 @@ const navItems = ref([
   { name: '心情日记', path: '/mood-diary' }
 ]);
 
-// 头像URL
-const avatarUrl = ref('https://img.alicdn.com/tfs/TB1CYgmNpXXXXc6XVXXXXXXXXXX-50-50.png');
+// 获取用户数据
+const userData = computed(() => {
+  const user = JSON.parse(window.sessionStorage.getItem('user') || '{}');
+  return user;
+});
+
+// 动态头像URL
+const avatarUrl = computed(() => {
+  const baseUrl = "http://154.9.253.102:8000";
+  if (userData.value?.avatar) {
+    return `${baseUrl}media/userAvatar/${userData.value.avatar}`;
+  }
+  // 默认头像
+  return 'https://img.alicdn.com/tfs/TB1CYgmNpXXXXc6XVXXXXXXXXXX-50-50.png';
+});
 
 // 头像点击事件处理函数
 const handleAvatarClick = () => {
   console.log('Avatar clicked!');
-  // 使用编程式导航跳转到用户信息页面
   router.push({ name: 'UserInfo' });
 };
 </script>
 
 <style scoped>
+/* 原有样式保持不变 */
 .container {
   font-family: 'Roboto', sans-serif;
   color: #333;
-  background-color: #f0f2f5; /* 更浅的背景色 */
+  background-color: #f0f2f5;
   min-height: 100vh;
-  padding-top: 60px; /* 防止内容被固定导航栏遮挡 */
+  padding-top: 60px;
 }
 
-/* 导航栏样式 */
 .navbar {
   position: fixed;
   top: 0;
   width: 100%;
   height: 60px;
-  background-color: #ffffff; /* 白色背景 */
+  background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   display: flex;
@@ -118,7 +130,6 @@ const handleAvatarClick = () => {
   cursor: pointer;
 }
 
-/* AI客服样式 */
 .ai-float-btn {
   position: fixed;
   bottom: 40px;
