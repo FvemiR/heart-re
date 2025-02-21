@@ -139,7 +139,7 @@ onBeforeUnmount(pauseAutoPlay);
 .carousel-container {
   position: relative;
   width: 100%;
-  margin-top: -95px;
+  margin-top: -107px;
   overflow: hidden;
   border-radius: 1px;
   box-shadow: 0 px 16px rgba(0,0,0,0.1);

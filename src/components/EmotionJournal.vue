@@ -1,13 +1,15 @@
 <template>
   <div class="emotion-journal">
-    <h2>情绪日记</h2>
-    <p class="description">记录你的每日情绪，帮助自己更好地理解和管理情绪。</p>
+    <el-card shadow="never" class="header-card">
+      <h2>情绪日记</h2>
+      <p class="description">记录你的每日情绪，帮助自己更好地理解和管理情绪。</p>
+    </el-card>
 
     <el-divider></el-divider>
 
-    <el-form :model="form" @submit.prevent="submitJournal">
+    <el-form :model="form" @submit.prevent="submitJournal" label-position="top">
       <el-form-item label="日期">
-        <el-date-picker v-model="form.date" type="date" placeholder="选择日期" />
+        <el-date-picker v-model="form.date" type="date" placeholder="选择日期" style="width: 100%;" />
       </el-form-item>
       <el-form-item label="日记标题">
         <el-input v-model="form.emotion" placeholder="今天心情如何?" style="width: 100%;" />
@@ -22,14 +24,18 @@
 
     <div class="journal-list">
       <h3>历史记录</h3>
-      <el-card v-for="(item, index) in journals" :key="index" class="journal-item" shadow="hover">
-        <div class="date">{{ formatDate(item.date) }}</div>
-        <div class="emotion-tag">
-          <el-tag :type="getEmotionType(item.emotion)">{{ item.emotion }}</el-tag>
-        </div>
-        <div class="content">{{ item.content }}</div>
-        <el-button type="danger" @click="deleteJournal(index)" icon="el-icon-delete">删除</el-button>
-      </el-card>
+      <el-timeline>
+        <el-timeline-item v-for="(item, index) in journals" :key="index" :color="getEmotionColor(item.emotion)">
+          <el-card shadow="hover" class="journal-item">
+            <div class="date">{{ formatDate(item.date) }}</div>
+            <div class="emotion-tag">
+              <el-tag :type="getEmotionType(item.emotion)">{{ item.emotion }}</el-tag>
+            </div>
+            <div class="content">{{ item.content }}</div>
+            <el-button type="danger" @click="deleteJournal(index)" icon="el-icon-delete">删除</el-button>
+          </el-card>
+        </el-timeline-item>
+      </el-timeline>
     </div>
   </div>
 </template>
@@ -65,6 +71,11 @@ const getEmotionType = (emotion) => {
   return types[emotion] || '';
 };
 
+const getEmotionColor = (emotion) => {
+  const colors = { happy: '#67C23A', calm: '#409EFF', anxious: '#E6A23C', sad: '#F56C6C' };
+  return colors[emotion] || '#909399';
+};
+
 const deleteJournal = (index) => {
   journals.value.splice(index, 1);
   ElMessage.success('记录已删除');
@@ -79,6 +90,13 @@ const deleteJournal = (index) => {
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header-card {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .description {
@@ -118,3 +136,6 @@ const deleteJournal = (index) => {
   margin-top: 10px;
 }
 </style>
+
+
+

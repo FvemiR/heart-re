@@ -1,341 +1,277 @@
 <template>
   <div class="page-container">
-    <div class="login-card">
-      <!-- 左侧图片区域 -->
-      <div class="left-section"></div>
+    <el-card class="login-card">
+      <div class="card-content">
 
-      <!-- 右侧注册表单 -->
-      <div class="right-section">
-        <div class="tab-switch">
-          <button 
-            :class="['tab-button', { 'active': activeTab === 'phone' }]"
-            @click="activeTab = 'phone'"
-          >
-            手机注册
-          </button>
-          <button
-            :class="['tab-button', { 'active': activeTab === 'account' }]"
-            @click="activeTab = 'account'"
-          >
-            账号注册
-          </button>
-        </div>
+        <!-- 左侧图片区域 -->
+        <div class="left-section"></div>
 
-        <form @submit.prevent="handleSubmit">
-          <!-- 错误信息展示 -->
-          <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+        <!-- 右侧注册表单 -->
+        <div class="right-section">
+          <el-tabs v-model="activeTab" stretch @tab-click="handleTabChange">
+            <el-tab-pane label="手机注册" name="phone"></el-tab-pane>
+            <el-tab-pane label="账号注册" name="account"></el-tab-pane>
+          </el-tabs>
 
-          <!-- 手机注册表单 -->
-          <div v-if="activeTab === 'phone'">
-            <div class="form-group">
-              <label for="phone">手机号码</label>
-              <input
-                type="tel"
-                id="phone"
-                v-model="phone"
-                placeholder="请输入手机号"
-                pattern="[0-9]{11}"
-              />
-            </div>
-            <div class="form-group">
-              <label for="code">验证码</label>
-              <div class="code-input">
-                <input
-                  type="text"
-                  id="code"
-                  v-model="code"
-                  placeholder="请输入验证码"
-                />
-                <button 
-                  type="button" 
-                  class="send-code-btn"
-                  :disabled="countdown > 0"
-                  @click="sendSMSCode"
+          <el-form :model="registerForm" :rules="currentRules" ref="registerFormRef" status-icon
+                   @submit.prevent="handleSubmit" class="register-form">
+            <el-alert v-if="errorMessage" :title="errorMessage" type="error" class="error-alert"/>
+
+            <!-- 手机注册表单 -->
+            <template v-if="activeTab === 'phone'">
+              <el-form-item prop="phone" style="margin-bottom: 30px;">
+                <el-input v-model="registerForm.phone" placeholder="请输入手机号" maxlength="11">
+                  <template #prefix>
+                    <el-icon>
+                      <Iphone/>
+                    </el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item prop="code" style="margin-bottom: 30px;">
+                <div class="code-input" style="display: flex;">
+                  <el-input v-model="registerForm.code" placeholder="请输入验证码" maxlength="4" clearable
+                            style="width: 255px">
+                    <template #prefix>
+                      <el-icon>
+                        <Message/>
+                      </el-icon>
+                    </template>
+                  </el-input>
+                  <el-button class="send-code-btn" :disabled="countdown > 0" @click="sendSMSCode">
+                    {{ countdown > 0 ? `${countdown}s后重发` : '获取验证码' }}
+                  </el-button>
+                </div>
+              </el-form-item>
+
+              <el-form-item prop="password" style="margin-bottom: 30px;">
+                <el-input
+                    v-model="registerForm.password"
+                    placeholder="请输入密码"
+                    type="password"
+                    show-password
                 >
-                  {{ countdown > 0 ? `${countdown}s后重发` : '获取验证码' }}
-                </button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="password">密码</label>
-              <input
-                type="password"
-                id="password"
-                v-model="password"
-                placeholder="请输入密码"
-              />
-            </div>
-          </div>
+                  <template #prefix>
+                    <el-icon>
+                      <Lock/>
+                    </el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+            </template>
 
-          <!-- 账号注册表单 -->
-          <div v-if="activeTab === 'account'">
-            <div class="form-group">
-              <label for="username">用户名</label>
-              <input
-                type="text"
-                id="username"
-                v-model="username"
-                placeholder="请输入用户名"
-              />
-            </div>
-            <div class="form-group">
-              <label for="password">密码</label>
-              <input
-                type="password"
-                id="password"
-                v-model="password"
-                placeholder="请输入密码"
-              />
-            </div>
-            <div class="form-group">
-              <label for="confirmPassword">确认密码</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                v-model="confirmPassword"
-                placeholder="请再次输入密码"
-              />
-            </div>
-          </div>
+            <!-- 账号注册表单 -->
+            <template v-if="activeTab === 'account'">
+              <el-form-item prop="username" style="margin-bottom: 30px;">
+                <el-input v-model="registerForm.username" placeholder="请输入用户名">
+                  <template #prefix>
+                    <el-icon>
+                      <User/>
+                    </el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
 
-          <button type="submit" class="login-button" @click="handleRegister">
-            {{ activeTab === 'phone' ? '立即注册' : '账号注册' }}
-          </button>
+              <el-form-item prop="password" style="margin-bottom: 30px;">
+                <el-input v-model="registerForm.password" placeholder="请输入密码" type="password" show-password>
+                  <template #prefix>
+                    <el-icon>
+                      <Lock/>
+                    </el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+            </template>
 
-          <div class="additional-options">
-            <router-link to="/login">返回登录</router-link>
-          </div>
-        </form>
+            <el-form-item>
+              <el-button type="primary" native-type="submit" class="register-button">
+                {{ activeTab === 'phone' ? '立即注册' : '账号注册' }}
+              </el-button>
+            </el-form-item>
+
+            <div class="additional-options" style="text-align: left;">
+              <router-link to="/login">
+                <el-link type="primary">返回登录</el-link>
+              </router-link>
+            </div>
+          </el-form>
+        </div>
       </div>
-    </div>
+    </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import {computed, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus';
+import {Iphone, Message, User, Lock} from '@element-plus/icons-vue'
+import requestUtil from "@/util/request.js";
 
 const router = useRouter()
 
-const activeTab = ref('phone') // 默认显示手机注册
-const phone = ref('')
-const code = ref('')
-const username = ref('')
-const password = ref('')
-const confirmPassword = ref('')
+const activeTab = ref('phone')
+const registerFormRef = ref()
 const countdown = ref(0)
 const errorMessage = ref('')
 
-const sendSMSCode = () => {
-  // 发送验证码逻辑
-  if (!phone.value.match(/^1[3-9]\d{9}$/)) {
-    errorMessage.value = '请输入有效的手机号码'
-    return
-  }
-  
-  errorMessage.value = ''
-  // 开始倒计时
-  countdown.value = 60
-  const timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(timer)
-    }
-  }, 1000)
+const registerForm = ref({
+  phone: '',
+  code: '',
+  username: '',
+  password: ''
+})
+
+const registerRules = {
+  phone: [
+    {required: true, message: '请输入手机号', trigger: 'blur'},
+    {pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号码', trigger: 'blur'}
+  ],
+  code: [
+    {required: true, message: '请输入验证码', trigger: 'blur'}
+  ],
+  username: [
+    {required: true, message: '请输入用户名', trigger: 'blur'}
+  ],
+  password: [
+    {required: true, message: '请输入密码', trigger: 'blur'}
+  ]
 }
 
-const handleSubmit = () => {
+const currentRules = computed(() => {
+  return activeTab.value === 'phone'
+      ? {phone: registerRules.phone, code: registerRules.code, password: registerRules.password}
+      : {username: registerRules.username, password: registerRules.password}
+})
+
+const handleTabChange = async () => {
   errorMessage.value = ''
+  registerFormRef.value?.clearValidate()
+}
 
-  if (activeTab.value === 'phone') {
-    if (!phone.value.match(/^1[3-9]\d{9}$/)) {
-      errorMessage.value = '请输入有效的手机号码'
-      return
-    }
-    if (!code.value) {
-      errorMessage.value = '请输入验证码'
-      return
-    }
-    if (!password.value) {
-      errorMessage.value = '请输入密码'
-      return
-    }
-
-    console.log('手机注册:', {
-      phone: phone.value,
-      code: code.value,
-      password: password.value
+const sendSMSCode = async () => {
+  try {
+    await registerFormRef.value.validateField('phone')
+    errorMessage.value = ''
+    const result = await requestUtil.post("api/users/sms", {
+      phone_num: registerForm.value.phone
     })
-  } else {
-    if (!username.value) {
-      errorMessage.value = '请输入用户名'
-      return
-    }
-    if (!password.value) {
-      errorMessage.value = '请输入密码'
-      return
-    }
-    if (password.value !== confirmPassword.value) {
-      errorMessage.value = '两次输入的密码不一致'
-      return
-    }
-
-    console.log('账号注册:', {
-      username: username.value,
-      password: password.value
-    })
+    countdown.value = 60
+    const timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0)
+        clearInterval(timer)
+    }, 1000)
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || '发送验证码失败'
   }
 }
 
-const handleRegister = () => {
-  handleSubmit()
-  if (!errorMessage.value) {
-    router.push('/Home')
+const handleSubmit = async () => {
+  errorMessage.value = ''
+  try {
+    await registerFormRef.value.validate()
+    let result
+    if (activeTab.value === 'phone') {
+      result = await requestUtil.post("api/users/sms_register", {
+        phone_num: registerForm.value.phone,
+        random_num: registerForm.value.code,
+        password: registerForm.value.password
+      })
+    } else {
+      result = await requestUtil.post("api/users/register", {
+        username: registerForm.value.username,
+        password: registerForm.value.password
+      })
+    }
+    ElMessage.success('注册成功');
+    await router.push("/login")
+  } catch (error) {
+    errorMessage.value = error.response ? error.response.data : '注册失败';
   }
 }
 </script>
 
 <style scoped>
+
 .page-container {
-  background-color: #f8f9fa; /* 更浅的白色背景 */
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 98vh;
+  background-color: #f5f7fa;
+  overflow: hidden;
 }
 
 .login-card {
-  background-color: #ffffff; /* 白色卡片背景 */
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  display: flex;
   width: 800px;
-  max-width: 90vw;
+  border-radius: 12px;
   overflow: hidden;
+}
+
+.send-code-btn {
+  width: 125px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.card-content {
+  display: flex;
 }
 
 .left-section {
   width: 40%;
-  background-image: url("../src/assets/心灵花园登录logo.png");
+  background-image: url("/src/assets/心灵花园登录logo.png");
   background-size: contain;
-  background-position: center;
   background-repeat: no-repeat;
-}
-
-.right-section {
-  padding: 40px;
-  flex: 1;
-}
-
-.tab-switch {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.tab-button {
-  flex: 1;
-  padding: 1rem;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  font-size: 1.1rem;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.tab-button.active {
-  color: #6366f1;
-  border-bottom-color: #6366f1;
-  font-weight: 600;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-group input {
-  width: 65%; /* 输入框宽度调窄 */
-  padding: 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-  border-color: #6366f1;
+  background-position: center;
 }
 
 .code-input {
   display: flex;
-  gap: 1rem;
+  gap: 10px;
 }
 
-.code-input input {
+.register-form {
+  margin-top: 20px;
+}
+
+.right-section {
   flex: 1;
-}
-
-.send-code-btn {
-  padding: 0 1rem;
-  background: #e0e7ff;
-  color: #6366f1;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.send-code-btn:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
-  cursor: not-allowed;
-}
-
-.login-button {
-  width: 100%;
-  padding: 1rem;
-  background-color: #6366f1;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.login-button:hover {
-  background-color: #4f46e5;
+  padding: 30px;
 }
 
 .additional-options {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
+  text-align: center;
+  margin-top: 15px;
 }
 
-.additional-options a {
-  text-decoration: none;
-  color: #6366f1;
-  transition: color 0.3s ease;
+.register-button {
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
 }
 
-.additional-options a:hover {
-  color: #4f46e5;
+.error-alert {
+  margin-bottom: 20px;
 }
 
-.error-message {
-  color: red;
-  margin-bottom: 1rem;
+:deep(.el-tabs__nav-wrap::after) {
+  height: 1px;
+  background-color: #e4e7ed;
+}
+
+:deep(.el-tabs__item) {
+  font-size: 16px;
+  padding: 0 20px;
+}
+
+:deep(.el-input__inner) {
+  height: 40px;
+}
+
+:deep(.el-icon) {
+  font-size: 16px;
 }
 </style>
-
-
-

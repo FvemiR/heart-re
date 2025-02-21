@@ -54,7 +54,12 @@ const router = createRouter({
             path: '/Home',
             name: 'Home',
             component: () => import('../views/Homeview.vue')
-          }
+          },
+        {
+          path: '/userinfo',
+          name: 'UserInfo',
+          component: () => import('../views/Information.vue') // 假设您将之前的代码保存为 UserInfo.vue
+        }
       ]
     },
   ],
