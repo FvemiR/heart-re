@@ -83,3 +83,28 @@ export default {
     fileUpload,
     getServerUrl
 }
+export function patch(url, params = {}) {
+
+    return new Promise((resolve, reject) => {
+    
+    httpService({
+    
+    url: url,
+    
+    method: 'patch',
+    
+    data: params
+    
+    }).then(response => {
+    
+    resolve(response);
+    
+    }).catch(error => {
+    
+    reject(error);
+    
+    });
+    
+    });
+    
+    }
