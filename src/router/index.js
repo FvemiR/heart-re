@@ -12,6 +12,10 @@ const router = createRouter({
       redirect: '/Login' // 关键配置：将根路径重定向到/Home
     },
     {
+        path:'/test',
+        component:()=>import('../views/test.vue')
+    },
+    {
       path:'/register',
       name:'register',
       component: ()=> import('../views/RegisterView.vue')
@@ -58,7 +62,7 @@ const router = createRouter({
         {
           path: '/userinfo',
           name: 'UserInfo',
-          component: () => import('../views/Information.vue') // 假设您将之前的代码保存为 UserInfo.vue
+          component: () => import('../views/KnowledgeView.vue') // 假设您将之前的代码保存为 UserInfo.vue
         }
       ]
     },

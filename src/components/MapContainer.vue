@@ -24,8 +24,16 @@
     <div id="route"></div>
   </div>
 </template>
-//样式的一些处理
+
 <style scoped>
+/* 新增下拉面板样式 */
+:deep(.amap-sug-result) {
+  z-index: 2001 !important;
+  position: absolute !important;
+  top: 40px !important;
+  left: 0 !important;
+}
+
 .waypoint-item {
   display: flex;
   gap: 10px;
@@ -49,6 +57,7 @@
   border-radius: 50%;
   cursor: pointer;
 }
+
 .map-container {
   height: 100vh;
   display: flex;
@@ -60,95 +69,113 @@
   padding: 12px 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 999;
+  position: relative;
 }
 
 .search-wrapper {
-  max-width: 800px;  /* 增加最大宽度 */
+  max-width: 800px;
   margin: 0 auto;
-  display: flex;      /* 新增Flex布局 */
-  gap: 16px;         /* 输入框间距 */
+  display: flex;
+  gap: 16px;
   width: 100%;
+  position: static;
 }
+
 #tipinput,
 #endinput {
-  flex: 1;           /* 等分剩余空间 */ 
+  flex: 1;
   padding: 12px 20px;
   border: 1px solid #e4e4e4;
   border-radius: 28px;
   font-size: 16px;
   transition: all 0.3s;
-}/*两个输入框的处理*/
+  position: relative;
+  z-index: 1000;
+}
+
 #container {
   flex: 1;
   height: calc(100vh - 60px);
 }
+
 #route {
-        position: fixed;
-        background-color: white;
-        max-height: 90%;
-        overflow-y: auto;
-        top: 150px;
-        right: 10px;
-        width: 280px;
-      }
+  position: fixed;
+  background-color: white;
+  max-height: 90%;
+  overflow-y: auto;
+  top: 150px;
+  right: 10px;
+  width: 280px;
+  z-index: 998;
+}
 </style>
 
 <script setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref, defineExpose } from "vue";
 import AMapLoader from "@amap/amap-jsapi-loader";
-import {ref} from "vue";
+
 let map = null;
+let AMapInstance = null;
 let startPoint = "";
 let endPoint = "";
-//添加途经点部分
-// 途经点存储数组（核心数据）
+let driving = null;
+
 const waypoints = ref([]);
 let uid = 0;
 
-// 添加途经点
+// 暴露方法给父组件
+defineExpose({
+  getRouteInfo: () => ({
+    points: [startPoint, ...waypoints.value.map(wp => wp.value), endPoint].filter(Boolean)
+  }),
+  clearRoute: () => {
+    if (driving) driving.clear();
+    waypoints.value = [];
+    startPoint = "";
+    endPoint = "";
+    document.getElementById('tipinput').value = '';
+    document.getElementById('endinput').value = '';
+  }
+});
+
 const addWaypoint = () => {
-  waypoints.value.push({
-    id: uid++,
-    value: ""
-  });
+  waypoints.value.push({ id: uid++, value: "" });
 };
 
-// 删除途经点
 const removeWaypoint = (id) => {
   waypoints.value = waypoints.value.filter(wp => wp.id !== id);
 };
 
-// 自动完成初始化（每个输入框单独绑定）
 const initAutocomplete = (el, id) => {
-  if (!el) return;
+  if (!el || !AMapInstance) return;
   
-  AMap.plugin(['AMap.AutoComplete'], () => {
-    new AMap.AutoComplete({ input: el });
+  AMapInstance.plugin(['AMap.AutoComplete'], () => {
+    new AMapInstance.AutoComplete({ 
+      input: el,
+      //panel: 'tipinput' // 指定下拉面板容器
+    });
   });
 };
-//添加途经点部分
+
 onMounted(() => {
-window._AMapSecurityConfig = {
-  securityJsCode: "3d09a082a01eea42adf1decd9fa795d6",
-};
-AMapLoader.load({
-  key: "3824907cffc0ba4801265f86da93b934", // 申请好的Web端开发者Key，首次调用 load 时必填
-  version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-  plugins: ["AMap.Scale","AMap.ToolBar","AMap.PlaceSearch","AMap.AutoComplete","AMap.Driving"], //需要使用的的插件列表，如比例尺'AMap.Scale'，支持添加多个如：['...','...']
-})
-  .then((AMap) => {
+  window._AMapSecurityConfig = { securityJsCode: "3d09a082a01eea42adf1decd9fa795d6" };
+  
+  AMapLoader.load({
+    key: "3824907cffc0ba4801265f86da93b934",
+    version: "2.0",
+    plugins: ["AMap.Scale", "AMap.ToolBar", "AMap.PlaceSearch", "AMap.AutoComplete", "AMap.Driving"]
+  }).then((AMap) => {
+    AMapInstance = AMap;
     map = new AMap.Map("container", {
-      // 设置地图容器id
-      viewMode: "3D", // 是否为3D地图模式
-      zoom: 15, // 初始化地图级别
-      center: [116.397428, 39.90923], // 初始化地图中心点位置
+      viewMode: "3D",
+      zoom: 15,
+      center: [116.397428, 39.90923],
     });
-    var driving = new AMap.Driving({
-        map: map,
-        panel: "route"
-    }); 
-    var toolbar = new AMap.ToolBar(); //创建工具条插件实例
-    map.addControl(toolbar); //添加工具条插件到页面
+
+    var driving = new AMap.Driving({ map: map, panel: "route" });
+    map.addControl(new AMap.ToolBar());
+
+    // 初始化起点和终点输入框的自动完成
     //第一个输入框搜索联想处理
     var autoOptions = {
       input: "tipinput"
@@ -175,48 +202,27 @@ AMapLoader.load({
           placeSearch.search(e.poi.name);
       });//注册监听，当选中某条记录时会触发
   });
-  //注册监听器，当点击开始规划是获取两个输入框的值
-  document.getElementById("saveButton").addEventListener("click", () => {
-  // 获取两个输入框的值
-  startPoint = document.getElementById("tipinput").value;  //起点输入框
-  endPoint = document.getElementById("endinput").value;  //终点输入框
-  console.log("起点:", startPoint, "终点:", endPoint);  //控制台打印两个输入框的值
-  if(startPoint&&endPoint)
-  {  
-    const viaPoints = waypoints.value
-      .map(wp => ({ keyword: wp.value.trim(), city: '' }))
-      .filter(wp => wp.keyword !== '');  //过滤掉空格并转换格式
 
-    // 构造路径规划参数数组
-    const searchPoints = [
-      { keyword: startPoint, city: '' },
-      ...viaPoints, // 插入所有途经点
-      { keyword: endPoint, city: '' }
-    ];
-      driving.search(searchPoints,function(status, result) {
-      // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
-      if (status === 'complete') {
-          log.success('绘制驾车路线完成')
+    document.getElementById("saveButton").addEventListener("click", () => {
+      startPoint = document.getElementById("tipinput").value;
+      endPoint = document.getElementById("endinput").value;
+      
+      if (startPoint && endPoint) {
+        const searchPoints = [
+          { keyword: startPoint, city: '' },
+          ...waypoints.value.map(wp => ({ keyword: wp.value, city: '' })),
+          { keyword: endPoint, city: '' }
+        ].filter(p => p.keyword.trim());
+
+        driving.search(searchPoints, (status) => {
+          if (status !== 'complete') console.error('路线规划失败');
+        });
       } else {
-          log.error('获取驾车数据失败：' + result)
+        alert('请输入起点和终点');
       }
     });
-  }
-  else
-  {
-    alert('请输入完整的起点与终点')
-  }
-    })
-})
-  .catch((e) => {
-    console.log(e);
   });
 });
 
-onUnmounted(() => {
-map?.destroy();
-});
+onUnmounted(() => map?.destroy());
 </script>
-
-
-

@@ -1,8 +1,22 @@
 <template>
   <div class="home-container">
     <!-- 首页其他内容 -->
-
     
+    <!-- 头像和下拉菜单 -->
+    <div class="header-avatar">
+      <el-dropdown @command="handleCommand">
+        <span class="el-dropdown-link">
+          <img src="../assets/avatar.jpg" alt="Avatar" class="avatar-image" />
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+            <el-dropdown-item command="logout">安全退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
+
     <!-- 轮播图部分 -->
     <div class="carousel-container" 
          @mouseenter="pauseAutoPlay" 
@@ -56,9 +70,21 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
+import { ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus';
 import p1 from '../assets/photo1.png'
 import p2 from '../assets/photo2.png'
+
 const router = useRouter();
+
+// 下拉菜单处理函数
+const handleCommand = (command) => {
+  if (command === 'profile') {
+    router.push('/userinfo');
+  } else if (command === 'logout') {
+    // 这里可以添加登出逻辑
+    console.log('Logout clicked');
+  }
+};
 
 // 轮播图数据
 const slides = ref([
@@ -133,6 +159,21 @@ onBeforeUnmount(pauseAutoPlay);
   padding-top: 100px;
   padding-bottom: 60px;
   background-color: #ffffff;
+}
+
+/* 头像样式 */
+.header-avatar {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.avatar-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 /* 轮播图样式 */
@@ -290,3 +331,6 @@ onBeforeUnmount(pauseAutoPlay);
   }
 }
 </style>
+
+
+
