@@ -90,7 +90,7 @@
                         <component :is="getPointIcon(i, activity.routePoints.length)"/>
                       </el-icon>
                       <span class="point-text">{{ point }}</span>
-                    </div>
+                    </div> 
                   </el-scrollbar>
                 </div>
               </div>

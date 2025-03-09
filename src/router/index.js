@@ -62,7 +62,7 @@ const router = createRouter({
         {
           path: '/userinfo',
           name: 'UserInfo',
-          component: () => import('../views/KnowledgeView.vue') // 假设您将之前的代码保存为 UserInfo.vue
+          component: () => import('../views/UserCenter/index.vue') // 假设您将之前的代码保存为 UserInfo.vue
         }
       ]
     },
